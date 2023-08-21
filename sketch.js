@@ -1,15 +1,17 @@
 
 // by Qian Li, ludwig.peking@gmail.com, 10/7/2022, all rights reserved
+let currentAge = "";
+let fadeCounter = 0;
 let tiles;
-let countMemo, stagnationTime, resourceTrend, populationTrend, population;
+let resourceTrend, populationTrend, population;
 let isPaused = false;
 let restartButton, pauseButton, resumeButton;
-const cols = 30;
+const cols = 40;
 const rows = 20;
 const totalTerritory = cols * rows;
 const resolution = 40;
 const noiseScale = 0.2;
-const frameRateSetting = 5;
+const frameRateSetting = 30;
 let bands = [];
 let nr = 0;
 let topLayer, figureLayer;
@@ -38,12 +40,12 @@ function setup() {
 
     // Create pause button and its callback
     pauseButton = createButton('Pause');
-    pauseButton.position(100, 10);
+    pauseButton.position(77, 10);
     pauseButton.mousePressed(pauseSimulation);
 
     // Create resume button and its callback
     resumeButton = createButton('Resume');
-    resumeButton.position(170, 10);
+    resumeButton.position(140, 10);
     resumeButton.mousePressed(resumeSimulation);
   while(bands.length<2){
     createCanvas(cols * resolution, rows * resolution);
@@ -70,10 +72,8 @@ function setup() {
       }
     }
   }
-  countMemo = bands.length;
   populationTrend = [];
   resourceTrend = [];
-  stagnationTime = 0;
 }
 
 function draw() {
@@ -91,15 +91,12 @@ function draw() {
     }
   }
   averageRichness = averageRichness / (cols * rows);
-  
   let population = 0;
   let count = 0;
   for (var band of bands) {
     band.die();
-
     if (band.dead == true) {
     }
-
     if (!band.dead) {
       if(!band.spawning)band.spawn();
       if(!band.moving)band.move();
@@ -110,7 +107,7 @@ function draw() {
     }
   }
 
-  if (populationTrend.length > 10) {populationTrend.shift();} 
+  if (populationTrend.length > 20) {populationTrend.shift();} 
   populationTrend.push(population);
   //derivative of populationTrend
   let derivative = [];
@@ -123,8 +120,7 @@ function draw() {
   }
   populationAverageDerivative = populationAverageDerivative / derivative.length;
 
-
-  if (resourceTrend.length && resourceTrend.length > 10) {resourceTrend.shift();} 
+  if (resourceTrend.length && resourceTrend.length > 20) {resourceTrend.shift();} 
   resourceTrend.push(averageRichness);
   //derivative of resourceTrend
   let resourceDerivative = [];
@@ -136,51 +132,63 @@ function draw() {
     resourceAverageDerivative += resourceDerivative[i];
   }
   resourceAverageDerivative = resourceAverageDerivative / resourceDerivative.length;
-
-  
-
-  if (countMemo === count) {
-    stagnationTime += 1;
-  } else {
-    stagnationTime = 0; 
-    countMemo = count;
+ 
+  let newAge = getAge(populationAverageDerivative, population, averageRichness);
+  if (newAge !== currentAge) {
+      currentAge = newAge;
+      fadeCounter = 255; // Reset fade counter
   }
   
-  let testFill = "";
-  if (populationAverageDerivative < - 10) { testFill = "Age of the Collapse"; }
-  if (populationAverageDerivative >= -10 &&  population >= totalTerritory) { testFill = "Age of the Stagnation"; }
-  if (population > totalTerritory && populationAverageDerivative >= 5) { testFill = "Age of the Exploitation"; }
-  if (population > totalTerritory && populationAverageDerivative < 0 && populationAverageDerivative >= -10) { testFill = "Death Match"; }
-  if (population < totalTerritory && populationAverageDerivative > -2 && averageRichness >=20) { testFill = "Dark Age Balance"; }
-  if (population > totalTerritory && populationAverageDerivative > 10 ) { testFill = "Age of Pioneer"; }
-  if (population < totalTerritory/5 && populationAverageDerivative > 0 &&  averageRichness >= 30) { testFill = "Age of Eden"; }
-  if (population == 0) { testFill = "We Extincted"; noLoop ();}
-  console.log('population ',round(population),'  population derivative',round(populationAverageDerivative), '  averageRichness:',round(averageRichness), testFill);
+  if (fadeCounter > 0 ) {
+    fadeCounter -= 12; 
+    displayAgeText(currentAge, fadeCounter+20);
+  }
 
+  console.log('population ',round(population),'  population derivative',round(populationAverageDerivative), '  averageRichness:',round(averageRichness), newAge);
 
-  topLayer.textSize(50);
-  topLayer.textAlign(CENTER);
-  topLayer.colorMode(RGB);
-  topLayer.fill(255);
-  topLayer.text(testFill, width / 2, height / 2);
   image(topLayer, 0, 0);
   image(figureLayer, 0, 0)
   
   topLayer.textSize(25);
   topLayer.colorMode(RGB);
-  topLayer.fill(0);
-  topLayer.text("surviving band(s) =" + count, 10, 33);
+  topLayer.textAlign(RIGHT, TOP);
+  topLayer.textFont("sans-serif");
+  topLayer.fill(255, 200);
+  topLayer.text("surviving band(s) =" + count, width - 20, 20);
   topLayer.textSize(15);
-  topLayer.text("by Qian Li, ludwig.peking@gmail.com, ", width - 400, height - 20);
+  topLayer.text("by Qian Li, ludwig.peking@gmail.com, ", width - 100, height - 20);
   topLayer.fill(255, 10, 200);
-  topLayer.text(" with: p5*js", width - 115, height - 20);
+  topLayer.text(" with: p5*js", width - 20, height - 20);
   topLayer.fill(255, 200);
   topLayer.textSize(30);
-  topLayer.text("banalSmasher.GENESIS(0)", width - 400, height - 50);
+  topLayer.text("a_Malthusian_World@urban_banal.GENESIS(0)", width - 20, height - 50);
   image(topLayer,0,0)
 }
 
+function getAge(populationAverageDerivative, population, averageRichness) {
+    if (population == 0) { noLoop(); return "We Extincted. " + bands.length + " bands lived here.";
+  }
+    if (populationAverageDerivative <= -10) return "Age of the Collapse";
+    if (population > totalTerritory*2 && populationAverageDerivative >= 20) return "Age of the Exploitation";
+    if (population <= totalTerritory && populationAverageDerivative < -5) return "Death Match";
+    if (population >= totalTerritory*2) return "Age of the Stagnation";
+    if (population <= totalTerritory/5 && averageRichness > 50) return "Age of Eden";
+    if (populationAverageDerivative > 10) return "Age of Pioneer";
+    return "Dark Age Balance";        
+}
+
+function displayAgeText(age, alphaValue) {
+  topLayer.textSize(90);
+  topLayer.textFont("serif");
+  topLayer.textAlign(CENTER, CENTER);
+  topLayer.colorMode(RGB);
+  topLayer.fill(255, alphaValue);
+  topLayer.text(age, width / 2, height / 2);
+}
+
+
 function restartSimulation() {
+  loop ();  // Unpause the simulation
   setup();  // Restart the simulation by calling setup again
 }
 

@@ -98,11 +98,11 @@ class Band {
   }
   
   show(){
-    for (let i =0; i < round(this.size/10); i++){
+    for (let i =0; i <= round(this.size/10); i++){
       if (i % 2) {
-        drawACaveman(this.x+resolution/2 + i * resolution/10 - resolution/10, this.y+resolution/2, resolution, this.R, this.G, this.B, figureLayer)
+        drawACaveman(this.x+resolution/2 + i * resolution/11 - resolution/10, this.y+resolution/2, resolution, this.R, this.G, this.B, figureLayer)
       } else {
-        drawACaveman(this.x+resolution/2 - i * resolution/10, this.y+resolution/2, resolution, this.R, this.G, this.B, figureLayer)
+        drawACaveman(this.x+resolution/2 - i * resolution/11, this.y+resolution/2, resolution, this.R, this.G, this.B, figureLayer)
       }
     
     }
@@ -117,9 +117,9 @@ function drawACaveman (x, y, res, r, g, b, layer){
   layer.noStroke();
   layer.ellipse(x, y-res/4, res/10)
   layer.rectMode(CENTER);
-  layer.rect (x, y, res * 0.2, res * 0.3)
+  layer.rect (x, y, res * 0.15, res * 0.3)
   layer.fill(r, g, b)
   layer.noStroke();
-  layer.triangle(x-res*0.1, y+ res*0.15, x+res/10, y+ res*0.15,  x+res/10, y-res*0.15)
+  layer.triangle(x-res/12, y+ res*0.15, x+res/12, y+ res*0.15,  x+res/12, y-res*0.15)
 }
 
