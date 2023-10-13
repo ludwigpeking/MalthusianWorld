@@ -5,13 +5,13 @@ let fadeCounter = 0;
 let tiles;
 let resourceTrend, populationTrend, population;
 let isPaused = false;
-let restartButton, pauseButton, resumeButton;
+let restartButton, pauseButton, resumeButton, speedSlider;
 const cols = 40;
 const rows = 20;
 const totalTerritory = cols * rows;
 const resolution = 40;
 const noiseScale = 0.2;
-const frameRateSetting = 30;
+const frameRateSetting = 10;
 let bands = [];
 let nr = 0;
 let topLayer, figureLayer;
@@ -34,25 +34,32 @@ function setup() {
     bands = [];
     nr = 0;
     tiles = [];
+    tiles = make2DArray(cols, rows);
+
     restartButton = createButton('Restart');
     restartButton.position(10, 10);
     restartButton.mousePressed(restartSimulation);
 
-    // Create pause button and its callback
-    pauseButton = createButton('Pause');
-    pauseButton.position(77, 10);
-    pauseButton.mousePressed(pauseSimulation);
+    pauseResumeButton = createButton('Pause');
+    pauseResumeButton.position(77, 10);
+    pauseResumeButton.mousePressed(togglePauseResume);
 
-    // Create resume button and its callback
-    resumeButton = createButton('Resume');
-    resumeButton.position(140, 10);
-    resumeButton.mousePressed(resumeSimulation);
-  while(bands.length<2){
+    // Create speed slider and its callback
+    speedSlider = createSlider(1, 60, frameRateSetting);
+    speedSlider.position(210, 10);
+    speedSlider.style('width', '80px');
+    speedSlider.input(function() {
+        frameRate(speedSlider.value());
+    });
+    let speedLabel = createSpan('Speed');
+    speedLabel.position(300, 10); 
+
+
     createCanvas(cols * resolution, rows * resolution);
     topLayer = createGraphics(cols * resolution, rows * resolution);
     figureLayer = createGraphics(cols * resolution, rows * resolution);
     frameRate(frameRateSetting);
-    tiles = make2DArray(cols, rows);
+    
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
         tiles[i][j] = new Tile(i, j, 200 * noise(i * noiseScale, j * noiseScale));
@@ -71,7 +78,10 @@ function setup() {
         tiles[i][j].defineNeighbors();
       }
     }
-  }
+    if (bands.length == 0) {
+      bands[0] = new Band(ceil(random(cols)), ceil(random(rows)), ceil(random(4, 20)));}
+
+    
   populationTrend = [];
   resourceTrend = [];
 }
@@ -144,7 +154,7 @@ function draw() {
     displayAgeText(currentAge, fadeCounter+20);
   }
 
-  console.log('population ',round(population),'  population derivative',round(populationAverageDerivative), '  averageRichness:',round(averageRichness), newAge);
+  // console.log('population ',round(population),'  population derivative',round(populationAverageDerivative), '  averageRichness:',round(averageRichness), newAge);
 
   image(topLayer, 0, 0);
   image(figureLayer, 0, 0)
@@ -179,23 +189,32 @@ function getAge(populationAverageDerivative, population, averageRichness) {
 
 function displayAgeText(age, alphaValue) {
   topLayer.textSize(90);
-  topLayer.textFont("serif");
+  topLayer.textFont("Cormorant");
   topLayer.textAlign(CENTER, CENTER);
   topLayer.colorMode(RGB);
   topLayer.fill(255, alphaValue);
   topLayer.text(age, width / 2, height / 2);
 }
 
-
 function restartSimulation() {
-  loop ();  // Unpause the simulation
-  setup();  // Restart the simulation by calling setup again
+  let currentSpeed = speedSlider.value();
+  restartButton.remove();
+  pauseButton.remove();
+  resumeButton.remove();
+  speedSlider.remove();
+  setup();
+  speedSlider.value(currentSpeed);
+  loop();  
 }
 
-function pauseSimulation() {
-  isPaused = true;
+function togglePauseResume() {
+  isPaused = !isPaused;  // Toggle the isPaused variable
+
+  if (isPaused) {
+      pauseResumeButton.html('Resume');  // Update button label to "Resume"
+  } else {
+      pauseResumeButton.html('Pause');  // Update button label to "Pause"
+      loop();  // Restart the draw loop if it was stopped
+  }
 }
 
-function resumeSimulation() {
-  isPaused = false;
-}
