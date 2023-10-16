@@ -3,7 +3,7 @@
 let currentAge = "";
 let fadeCounter = 0;
 let tiles;
-let resourceTrend, populationTrend, population;
+let resourceTrend, populationTrend, growthRateTrend, population;
 let isPaused = false;
 let restartButton, pauseButton, resumeButton, speedSlider;
 const cols = 40;
@@ -11,7 +11,7 @@ const rows = 20;
 const totalTerritory = cols * rows;
 const resolution = 40;
 const noiseScale = 0.2;
-const frameRateSetting = 10;
+const frameRateSetting = 8;
 let bands = [];
 let nr = 0;
 let topLayer, figureLayer;
@@ -46,8 +46,8 @@ function setup() {
 
     // Create speed slider and its callback
     speedSlider = createSlider(1, 60, frameRateSetting);
-    speedSlider.position(210, 10);
-    speedSlider.style('width', '80px');
+    speedSlider.position(150, 10);
+    speedSlider.style('width', '120px');
     speedSlider.input(function() {
         frameRate(speedSlider.value());
     });
@@ -83,7 +83,9 @@ function setup() {
 
     
   populationTrend = [];
+  growthRateTrend = [];
   resourceTrend = [];
+
 }
 
 function draw() {
@@ -146,11 +148,11 @@ function draw() {
   let newAge = getAge(populationAverageDerivative, population, averageRichness);
   if (newAge !== currentAge) {
       currentAge = newAge;
-      fadeCounter = 255; // Reset fade counter
+      fadeCounter = 355; // Reset fade counter
   }
   
   if (fadeCounter > 0 ) {
-    fadeCounter -= 12; 
+    fadeCounter -= 8; 
     displayAgeText(currentAge, fadeCounter+20);
   }
 
@@ -164,7 +166,7 @@ function draw() {
   topLayer.textAlign(RIGHT, TOP);
   topLayer.textFont("sans-serif");
   topLayer.fill(255, 200);
-  topLayer.text("surviving band(s) =" + count, width - 20, 20);
+  topLayer.text("surviving band(s) =" + count + ";  population = "+ round(population) + "; growth =  "+ round(populationAverageDerivative), width - 20, 20);
   topLayer.textSize(15);
   topLayer.text("by Qian Li, ludwig.peking@gmail.com, ", width - 100, height - 20);
   topLayer.fill(255, 10, 200);
@@ -176,15 +178,18 @@ function draw() {
 }
 
 function getAge(populationAverageDerivative, population, averageRichness) {
-    if (population == 0) { noLoop(); return "We Extincted. " + bands.length + " bands lived here.";
-  }
-    if (populationAverageDerivative <= -10) return "Age of the Collapse";
-    if (population > totalTerritory*2 && populationAverageDerivative >= 20) return "Age of the Exploitation";
-    if (population <= totalTerritory && populationAverageDerivative < -5) return "Death Match";
-    if (population >= totalTerritory*2) return "Age of the Stagnation";
-    if (population <= totalTerritory/5 && averageRichness > 50) return "Age of Eden";
-    if (populationAverageDerivative > 10) return "Age of Pioneer";
-    return "Dark Age Balance";        
+    if (population == 0) { noLoop(); return "We Extincted. " + bands.length + " bands lived here.";}
+    if (populationAverageDerivative <= -10 && population> totalTerritory*2) return "Age of the Collapse";
+    if (populationAverageDerivative <= -10 && population<= totalTerritory*2) return "Death Match";
+    if (populationAverageDerivative >= 10 && population<= totalTerritory/3) return "Age of the Exploitation";
+    // if (population > totalTerritory*2 && populationAverageDerivative >= 10) return "Age of the Exploitation";
+    // if (population <= totalTerritory/3 && populationAverageDerivative < -3) return "Death Match";
+    // if (population >= totalTerritory && abs(populationAverageDerivative)<5) return "Age of the Stagnation";
+    // if (population <= totalTerritory/5 && averageRichness > 50) return "Age of Eden";
+    // if (populationAverageDerivative > 5) return "Age of Pioneer";
+    // // return "Dark Age Balance";      
+    // return "";        
+  
 }
 
 function displayAgeText(age, alphaValue) {
@@ -198,9 +203,7 @@ function displayAgeText(age, alphaValue) {
 
 function restartSimulation() {
   let currentSpeed = speedSlider.value();
-  restartButton.remove();
-  pauseButton.remove();
-  resumeButton.remove();
+ 
   speedSlider.remove();
   setup();
   speedSlider.value(currentSpeed);
