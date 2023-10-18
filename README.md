@@ -1,3 +1,6 @@
+## Malthusian World Simulation
+
+Author: Richard Qian Li, 2022. Javascript, p5 library.
 This code is a simulation of a world governed by Malthusian principles. A Malthusian world refers to a scenario where the growth of a population is checked by limited resources.
 
 In this simulation, the world consists of a grid where each cell can be occupied by a "band" of people. These bands can grow in size, move around, divide themselves into dispatches when the local resources are not enough to supply.  
