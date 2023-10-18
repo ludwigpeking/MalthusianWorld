@@ -70,7 +70,7 @@ function setup() {
     
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
-        tiles[i][j] = new Tile(i, j, 200 * noise(i * noiseScale, j * noiseScale));
+        tiles[i][j] = new Tile(i, j, 20+180 * noise(i * noiseScale, j * noiseScale));
         tiles[i][j].occupy = false;
 
         if (spawningRate > random()) {
@@ -238,14 +238,23 @@ function updateGraph(history) {
     graphLayer.fill(255, history[0].length - i, 0, (i - history[0].length) + 255  );
     graphLayer.ellipse(x, y, 5, 5);  // Draw the point for the current population and growth
 }
-  //heart beat graph
-  graphLayer.fill(0, 0, 255);
 
+  //average richness heart beat graph
+  graphLayer.fill(0, 200, 0);
   for (let i = history[0].length - 1; i >= max(0, history[0].length-1000); i--) {
     let x = 210 + (i - history[0].length)/5;
-    let y = map(history[0][i], 0, cols * rows * 4, 230, 80);
+    let y = map(history[2][i], 0, 300, 230, 80);
     graphLayer.circle(x, y, 2);
   }
+    //population heart beat graph
+    graphLayer.fill(0, 0, 255);
+
+    for (let i = history[0].length - 1; i >= max(0, history[0].length-1000); i--) {
+      let x = 210 + (i - history[0].length)/5;
+      let y = map(history[0][i], 0, cols * rows * 4, 230, 80);
+      graphLayer.circle(x, y, 2);
+    }
+
   //add captions to the graphs
   graphLayer.noStroke();
   graphLayer.textSize(18);
@@ -255,6 +264,8 @@ function updateGraph(history) {
   graphLayer.text("growth rate", 15, 80);
   graphLayer.fill(0,0,255);
   graphLayer.text("population", 210, 80);
+  graphLayer.fill(0,200,0);
+  graphLayer.text("resources", 210, 100);
 
 }
 
@@ -268,11 +279,13 @@ function getAge(growth, population, averageRichness, growthRateChange) {
       return "Age of Boom";
   } else if (growth> 0 && growthRateChange <= 0  && population >= totalTerritory *2) {
       return "Age of Crisis";
-  } else if (growth<= 0 && growthRateChange <= 0 && averageRichness <= 50 && population >= totalTerritory *2) {
+  } else if (growth<= 0 && growthRateChange <= 0 && averageRichness <= 50 && population >= totalTerritory ) {
       return "Age of Collapse";
-  } else if (growth<= 0 && averageRichness <= 50 && population < totalTerritory *2) {
+  } else if (growth<= 0 && averageRichness <= 15 && population < totalTerritory /5) {
       return "the Death Match";
-  } else if (growth<= 0 && growthRateChange > 0 &&averageRichness <= 50 && population < totalTerritory *2) {
+  } else if (growth<= 0 && abs (growthRateChange) <= 1 && abs (averageRichness-30) <= 10 && abs(population-totalTerritory/3) < totalTerritory/10) {
+      return "Metastable State";
+  } else if (abs(growth)<= 1 && growthRateChange > 0 &&averageRichness <= 50 && population < totalTerritory /30) {
       return "Age of Noah";
   } else {
       return " ";

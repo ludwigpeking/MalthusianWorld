@@ -17,6 +17,7 @@ In this simulation, the world consists of a grid where each cell can be occupied
 
 2. **Ages or States of the World:**
     - Different "ages" or states of the world (like "Age of Eden," "Age of Collapse") are determined based on the population and resource dynamics. This is analogous to the cycles of growth and decline in a Malthusian world.
+    - There are chances that the system run into some **Metastable State** , when there's a certain amount of population and resources, the consumption and the recovery of the envorinment are balanced, and the system can stay in this state for a long time. However it is likely to break out of this state and enter a new state, which could be a state of prosperity or a state of collapse.
 
 3. **Population Movement and Utilization of Resources:**
     - Bands can move and exploit resources, similar to how human populations historically migrated and exploited new lands. However, in a closed, technologically stagnant society, these resources are finite and can be depleted.
@@ -30,7 +31,7 @@ In this simulation, the world consists of a grid where each cell can be occupied
     - Population growth is checked by the availability of resources. In a real-world Malthusian scenario, this would be analogous to famines, diseases, and other disasters that reduce the population when it exceeds the carrying capacity of the environment.
 
 3. **Cyclical Nature:**
-    - The simulation’s different “ages” reflect the cyclical nature of a Malthusian world. There are periods of prosperity when resources are abundant, followed by periods of decline as resources are depleted, and the population is checked.
+    - The simulation’s different “ages” reflect the cyclical nature of a Malthusian world. There are periods of prosperity when resources are abundant, followed by periods of decline as resources are depleted, and the population is checked. The signature is a long and slow period of early growth, followed by a rapid collapse, and then a slow recovery or complete extingtion.
 
 ### Reflection on Modern Society:
 
